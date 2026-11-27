@@ -1,55 +1,75 @@
 # OP-COM Visualizer Suite (`OP-COM-Visualizer-by-FlopyHU`)
 
-A modular, zero-dependency, 100% client-side **OP-COM LiveData & Measuring Blocks Snapshot Visualizer** designed for Opel / Vauxhall diagnostics and ECU calibration analysis.
-
-Companion open-source project to [Opel Generator Suite](https://github.com/FlopyHU/Opel-Generator-Suite-by-FlopyHU) by **FlopyHU** (Csönkös Csaba).
+[English](#english) | [Magyar](#magyar)
 
 ---
 
-## Features
+<a name="english"></a>
+## English
 
-- **100% Module-Agnostic:** Works with any OP-COM control unit export — Engine (`Z17DTH`, `Z19DTH`, `Z16XEP`, etc.), ABS/ESP, CIM, REC, Instrument Cluster, or Transmission.
-- **Dual Format Support:**
-  - **LiveData Telemetry Logs (`[PROGVER]` / `[MODELINFO]` / `[ECUINFO]`):** Full time-series plotting with automatic Windows-1250/1252 degree-symbol decoding (`°C`) and duplicate-sensor disambiguation (e.g. `Boost Pressure [kPa]` vs `Boost Pressure [V]`).
-  - **Measuring Blocks Snapshots:** Drop multiple snapshot CSVs simultaneously to generate an automatic side-by-side comparison diff table highlighting changed parameters.
-- **Multi-Unit Overlay Engine:** Overlay any combination of parameters onto one interactive canvas with automatic multi-Y-axis grouping (`kPa`, `RPM`, `%`, `MPa`, `°C`, `V`) and LTTB downsampling for smooth 60 FPS zooming on 100,000+ row logs.
-- **Calculated Virtual Math Channels:** Automatically derives **Boost Deviation** (`Actual - Commanded`), **Relative Boost (Gauge)** (`Boost - Barometric`), **Rail Pressure Error**, and **MAF Deviation** whenever matching sensors exist in the log.
-- **Two-Point Delta Cursors (`Δt` & `Δy`):** Click any two timestamps on the graph to measure exact spool-up duration and parameter deltas.
-- **VIN Privacy Masking & PNG Export:** One-click VIN masking before exporting clean PNG screenshots for forums, tuning logs, or bug reports.
-- **Bilingual UI:** Instant English (`EN`) and Hungarian (`HU`) interface toggle.
+A modular, zero-dependency, 100% client-side **OP-COM LiveData & Measuring Blocks Snapshot Visualizer** for Opel / Vauxhall diagnostics and ECU calibration analysis, created by **FlopyHU**.
 
----
+Companion open-source project to [Opel Generator Suite](https://github.com/FlopyHU/Opel-Generator-Suite-by-FlopyHU).
 
-## Deploying to GitHub Pages
+### Key Features
+- **Module-Agnostic Parser:** Works with any OP-COM export regardless of control unit or model — Engine (`Z17DTH`, `Z19DTH`, `Z16XEP`, etc.), ABS/ESP, CIM, REC, Instrument Cluster, or Transmission.
+- **LiveData & Snapshot Support:**
+  - **LiveData Telemetry Logs (`[PROGVER]` / `[MODELINFO]` / `[ECUINFO]`):** Full time-series visualization with automatic Windows-1250/1252 degree symbol (`°C`) decoding and duplicate header disambiguation (such as `Boost Pressure [kPa]` vs. `Boost Pressure [V]`).
+  - **Measuring Blocks Snapshots:** Drop multiple snapshot CSV files at once for an automatic side-by-side comparison diff table with a changed-values-only filter.
+- **Multi-Unit Overlay & Math Channels:** Overlay any channels onto one chart with automatic multi-Y-axis scaling (`kPa`, `RPM`, `%`, `MPa`, `°C`, `V`), LTTB downsampling for smooth zooming on large logs, and calculated virtual channels (*Boost Deviation*, *Relative Boost*, *Rail Pressure Error*, *MAF Deviation*).
+- **Delta Cursors, Privacy & Export:** Measure `Δt` and `Δy` between two clicked points on the graph, toggle VIN masking before sharing screenshots, export the chart as PNG, and switch between **EN** and **HU** in the UI.
 
-1. Push this repository to GitHub (`FlopyHU/OP-COM-Visualizer-by-FlopyHU`).
-2. Open **Settings → Pages** in your GitHub repository.
-3. Under **Build and deployment → Source**, select **Deploy from a branch**.
-4. Choose the `main` branch and `/ (root)` folder, then click **Save**.
-5. Your live visualizer will be available at `https://flopyhu.github.io/OP-COM-Visualizer-by-FlopyHU/`.
+### GitHub Pages Setup
+1. Push all files to `FlopyHU/OP-COM-Visualizer-by-FlopyHU` keeping the `css/`, `js/`, and `samples/` folders intact.
+2. Go to **Settings → Pages** in the repository.
+3. Under **Build and deployment → Source**, choose **Deploy from a branch**, select the `main` branch and `/ (root)` folder, and click **Save**.
+4. Open the published site at `https://flopyhu.github.io/OP-COM-Visualizer-by-FlopyHU/`.
 
----
-
-## Repository Structure
-
+### Project Structure
 ```text
 OP-COM-Visualizer-by-FlopyHU/
-├── index.html          # Main application UI & inline Opel Blitz branding
+├── index.html
+├── README.md
+├── LICENSE
 ├── css/
-│   └── style.css       # OEM-plus dark theme & responsive data tables
+│   └── style.css
 ├── js/
-│   ├── i18n.js         # EN / HU localization strings
-│   ├── parser.js       # OP-COM LiveData & Snapshot CSV parser + virtual math channels
-│   ├── chart.js        # LTTB-accelerated multi-Y-axis canvas telemetry renderer
-│   └── app.js          # UI state, smart presets, snapshot diff table, PNG export
-├── samples/            # Anonymized Z17DTH sample logs for instant demo mode
-├── LICENSE             # Open-source non-commercial attribution license
-└── README.md
+│   ├── app.js
+│   ├── chart.js
+│   ├── i18n.js
+│   └── parser.js
+└── samples/
+    ├── Sample_Livedata_Astra-H_Z17DTH.csv
+    ├── Sample_Snapshot_1_ColdWarmup.csv
+    ├── Sample_Snapshot_2_OperatingTemp.csv
+    └── gary.txt
 ```
 
 ---
 
-## License & Attribution
+<a name="magyar"></a>
+## Magyar
 
-Created by **FlopyHU** (Csönkös Csaba).  
-Free for personal, educational, and automotive enthusiast use. Forks and contributor pull requests are welcome; uncredited copies or commercial redistribution without explicit permission are prohibited.
+Moduláris, külső függőségek nélküli, 100%-ban böngészőben (kliensoldalon) futó **OP-COM LiveData és Mérőblokk-pillanatkép Vizualizáló** Opel / Vauxhall hibakereséshez és ECU-logok elemzéséhez, **FlopyHU** fejlesztésében.
+
+A [FlopyHU/Opel-Generator-Suite-by-FlopyHU](https://github.com/FlopyHU/Opel-Generator-Suite-by-FlopyHU) projekt testvér-alkalmazása.
+
+### Főbb funkciók
+- **Modul-független feldolgozás:** Bármilyen vezérlőegység és típus OP-COM CSV exportját kezeli — Motor (`Z17DTH`, `Z19DTH`, `Z16XEP` stb.), ABS/ESP, CIM, REC, műszeregység vagy váltó.
+- **LiveData és Pillanatkép mód:**
+  - **LiveData telemetria (`[PROGVER]` / `[MODELINFO]` / `[ECUINFO]`):** Idősoros grafikon automatikus Windows-1250/1252 fokjel (`°C`) dekódolással és azonos nevű oszlopok szétválasztásával (például `Boost Pressure [kPa]` és `Boost Pressure [V]`).
+  - **Mérőblokk-pillanatképek:** Több pillanatkép CSV egyszerre történő behúzásakor automatikus összehasonlító táblázatot készít, és külön szűrhető benne, mi változott.
+- **Többtengelyes átfedés és matek csatornák:** Több mérőblokk egymásra vetítése automatikus mértékegység-alapú Y-tengelyekkel (`kPa`, `RPM`, `%`, `MPa`, `°C`, `V`), LTTB mintaritkítással a gyors nagyításhoz, valamint számított csatornákkal (*Boost Deviation*, *Relative Boost*, *Rail Pressure Error*, *MAF Deviation*).
+- **Delta kurzorok, alvázszám-maszkolás és export:** Két kattintással mérhető `Δt` és `Δy` a grafikonon, egy kattintással maszkolható a VIN a képernyőmentések előtt, PNG-ként menthető a grafikon, a felület pedig **EN** és **HU** között váltható.
+
+### GitHub Pages beállítása
+1. Töltsd fel a fájlokat a `FlopyHU/OP-COM-Visualizer-by-FlopyHU` repóba a `css/`, `js/` és `samples/` mappák megtartásával.
+2. Nyisd meg a repóban a **Settings → Pages** menüt.
+3. A **Build and deployment → Source** alatt válaszd a **Deploy from a branch** lehetőséget, majd a **`main`** ágat és a **`/ (root)`** mappát, és mentsd el.
+4. Az oldal a `https://flopyhu.github.io/OP-COM-Visualizer-by-FlopyHU/` címen érhető el.
+
+---
+
+## License & Attribution / Licenc és hivatkozás
+
+Created by **FlopyHU**. Free for personal, educational, and enthusiast use; forks and pull requests are welcome, while uncredited copies or commercial redistribution without permission are prohibited.
