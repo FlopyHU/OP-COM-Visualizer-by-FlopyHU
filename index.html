@@ -13,7 +13,7 @@
 <body class="look-modern">
   <header class="app-header">
     <div class="brand-group">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/7/7b/Opel-Logo_2017.png?utm_source=hu.wikipedia.org&utm_campaign=index&utm_content=original" alt="Opel Logo" class="header-opel-logo" />
+      <img src="https://upload.wikimedia.org/wikipedia/commons/7/7b/Opel-Logo_2017.png?utm_source=hu.wikipedia.org&utm_campaign=index&utm_content=original" alt="Opel Logo" width="36" height="36" class="header-opel-logo" />
       <div>
         <div class="brand-title-row">
           <h1>OP-COM VISUALIZER <span class="badge-pro">SUITE</span></h1>
@@ -201,5 +201,23 @@
   <script src="js/parser.js"></script>
   <script src="js/chart.js"></script>
   <script src="js/app.js"></script>
+  <script>
+    // Disables right-click context menu
+    document.addEventListener("contextmenu", (e) => e.preventDefault());
+
+    // Blocks common developer tools and source-view shortcuts
+    document.addEventListener("keydown", (e) => {
+      const key = (e.key || "").toUpperCase();
+      if (
+        e.keyCode === 123 ||
+        key === "F12" ||
+        (e.ctrlKey && e.shiftKey && (key === "I" || key === "C" || key === "J")) ||
+        (e.ctrlKey && key === "U")
+      ) {
+        e.preventDefault();
+        return false;
+      }
+    });
+  </script>
 </body>
 </html>
