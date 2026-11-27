@@ -83,7 +83,6 @@ function setLook(look) {
 document.getElementById("btnLookModern").addEventListener("click", () => setLook("modern"));
 document.getElementById("btnLookClassic").addEventListener("click", () => setLook("classic"));
 
-
 document.querySelectorAll(".tab-btn").forEach(btn => {
   btn.addEventListener("click", () => switchTab(btn.dataset.tab));
 });
@@ -204,7 +203,6 @@ function ingestParsedFiles(parsedList) {
     autoSelectDefaultChannels(newLive.channels);
   }
   if (newSnaps.length) {
-    // Append or replace snapshots
     state.snapshots = newLive ? newSnaps : [...state.snapshots, ...newSnaps];
   }
 
@@ -230,11 +228,10 @@ function ingestParsedFiles(parsedList) {
 }
 
 function autoSelectDefaultChannels(channels) {
-  // Automatically pick interesting primary channels regardless of module type
   const priorityPatterns = [
     /Engine Speed/i,
     /Boost Pressure Command/i,
-    /^Boost Pressure \[kPa\]$|^Boost Pressure$/i,
+    /^Boost Pressure \[(?:kPa|bar)\]$|^Boost Pressure$/i,
     /Vehicle Speed$/i,
     /Calculated Pedal Position/i
   ];
@@ -244,7 +241,6 @@ function autoSelectDefaultChannels(channels) {
     if (match) state.selectedChannels.add(match.id);
   });
 
-  // Fallback for non-Engine modules (e.g. ABS, CIM, Transmission): pick first 3 numeric channels with variance
   if (state.selectedChannels.size === 0) {
     const varying = channels.filter(c => c.isNumeric && c.max !== c.min).slice(0, 3);
     const fallback = varying.length ? varying : channels.slice(0, 3);
@@ -259,7 +255,7 @@ function buildSmartPresets(channels) {
   const presetDefs = [
     {
       label: "Turbo & VNT",
-      patterns: [/Engine Speed/i, /Boost Pressure Command/i, /^Boost Pressure \[kPa\]$|^Boost Pressure$/i, /Pulse Ratio Boost/i, /Boost Deviation/i]
+      patterns: [/Engine Speed/i, /Boost Pressure Command/i, /^Boost Pressure \[(?:kPa|bar)\]$|^Boost Pressure$/i, /Pulse Ratio Boost/i, /Boost Deviation/i]
     },
     {
       label: "Common Rail Fuel",
@@ -275,7 +271,7 @@ function buildSmartPresets(channels) {
     },
     {
       label: "Thermal & Charging",
-      patterns: [/Coolant Temperature \[°C\]/i, /Intake Air Temperature \[°C\]/i, /Battery Voltage/i, /A\/C Pressure \[kPa\]/i]
+      patterns: [/Coolant Temperature \[°C\]/i, /Intake Air Temperature \[°C\]/i, /Battery Voltage/i, /A\/C Pressure \[(?:kPa|bar)\]/i]
     }
   ];
 
@@ -379,14 +375,12 @@ function syncChartAndTable() {
   if (!state.liveData) return;
   chart.setData(state.liveData.times, state.liveData.channels, state.selectedChannels);
 
-  // Sync checkboxes & row highlights
   document.querySelectorAll("#channelTableBody input[type=checkbox]").forEach(cb => {
     const isSel = state.selectedChannels.has(cb.dataset.chid);
     cb.checked = isSel;
     cb.closest("tr").classList.toggle("row-selected", isSel);
   });
 
-  // Render active legend chips above chart
   const legend = document.getElementById("activeLegend");
   legend.innerHTML = "";
   state.liveData.channels.filter(c => state.selectedChannels.has(c.id)).forEach(ch => {
@@ -414,7 +408,7 @@ function handleCursorMove(idx) {
     const cell = document.getElementById(`cur_${ch.id}`);
     if (!cell) return;
     cell.textContent = ch.isNumeric
-      ? ch.values[idx].toFixed(ch.unit === "bar" ? 2 : 2)
+      ? ch.values[idx].toFixed(2)
       : ch.rawText[idx];
   });
 }
@@ -453,14 +447,12 @@ function renderSnapshotsTable() {
   tbody.innerHTML = "";
   if (!state.snapshots.length) return;
 
-  // Header row
   const trHead = document.createElement("tr");
   trHead.innerHTML = `<th>Measuring Block</th>` + state.snapshots.map((s, idx) =>
     `<th>Snapshot #${idx + 1}<br><span class="muted" style="font-weight:400">${s.meta.timestamp || s.meta.fileName}</span></th>`
   ).join("");
   thead.appendChild(trHead);
 
-  // Collect union of all measuring block keys across snapshots
   const allKeys = [];
   const seen = new Set();
   state.snapshots.forEach(s => {
