@@ -4,15 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>OP-COM Visualizer Suite — By FlopyHU</title>
+  <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/7/7b/Opel-Logo_2017.png?utm_source=hu.wikipedia.org&utm_campaign=index&utm_content=original" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body>
+<body class="look-modern">
   <header class="app-header">
     <div class="brand-group">
-      <div class="brand-mark" aria-hidden="true">OP</div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/7/7b/Opel-Logo_2017.png?utm_source=hu.wikipedia.org&utm_campaign=index&utm_content=original" alt="Opel Logo" class="header-opel-logo" />
       <div>
         <div class="brand-title-row">
           <h1>OP-COM VISUALIZER <span class="badge-pro">SUITE</span></h1>
@@ -22,6 +23,11 @@
     </div>
 
     <div class="header-actions">
+      <div class="look-switcher" role="group" aria-label="Style Theme">
+        <button id="btnLookModern" class="btn btn-small btn-outline active" data-look="modern" title="Modern Dark Theme">Modern</button>
+        <button id="btnLookClassic" class="btn btn-small btn-outline" data-look="classic" title="Classic Light Theme">Classic</button>
+      </div>
+
       <button id="btnLoadSample" class="btn btn-secondary" title="Load Z17DTH Sample Recording & Snapshots">
         <span class="icon">⚡</span> <span data-i18n="loadSample">Load Demo Log (Z17DTH)</span>
       </button>
@@ -36,7 +42,10 @@
       <button id="btnExportPng" class="btn btn-ghost" title="Export Current Graph as PNG" disabled>
         <span>📸</span> <span data-i18n="exportPng">PNG</span>
       </button>
-      <button id="btnLang" class="btn btn-lang" title="Switch Language">EN / HU</button>
+      <button id="btnLang" class="btn btn-lang" title="Switch Language">
+        <img src="https://flagcdn.com/w20/gb.png" alt="EN" id="langFlag" />
+        <span id="langLabel">EN / HU</span>
+      </button>
     </div>
   </header>
 
