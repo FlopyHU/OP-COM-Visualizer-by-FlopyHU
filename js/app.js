@@ -8,6 +8,7 @@ const state = {
   selectedChannels: new Set(),
   showVirtual: true,
   maskVin: false,
+  pressureUnit: "kpa",
   activeTab: "livedata",
   cursorIdx: -1
 };
@@ -106,6 +107,52 @@ document.getElementById("btnToggleVirtual").addEventListener("click", (e) => {
   syncChartAndTable();
 });
 
+document.getElementById("btnToggleBar").addEventListener("click", (e) => {
+  state.pressureUnit = state.pressureUnit === "kpa" ? "bar" : "kpa";
+  const isBar = state.pressureUnit === "bar";
+  e.currentTarget.classList.toggle("active", isBar);
+  document.getElementById("lblUnitBar").textContent = isBar ? "Unit: bar (kPa ÷ 100)" : "kPa → bar";
+  applyPressureUnitToLiveData();
+  renderChannelTable();
+  syncChartAndTable();
+  if (state.snapshots.length) renderSnapshotsTable();
+});
+
+function applyPressureUnitToLiveData() {
+  if (!state.liveData) return;
+  const toBar = state.pressureUnit === "bar";
+  state.liveData.channels.forEach(ch => {
+    if (!ch.isNumeric) return;
+    if (!ch.origUnit) {
+      ch.origUnit = ch.unit;
+      ch.origName = ch.name;
+      ch.origValues = new Float64Array(ch.values);
+      ch.origMin = ch.min;
+      ch.origMax = ch.max;
+      ch.origAvg = ch.avg;
+    }
+    if (ch.origUnit.toLowerCase() === "kpa") {
+      if (toBar) {
+        ch.unit = "bar";
+        ch.name = ch.origName.replace(/\[kPa\]/i, "[bar]");
+        for (let i = 0; i < ch.origValues.length; i++) {
+          ch.values[i] = ch.origValues[i] / 100;
+        }
+        ch.min = ch.origMin / 100;
+        ch.max = ch.origMax / 100;
+        ch.avg = ch.origAvg / 100;
+      } else {
+        ch.unit = ch.origUnit;
+        ch.name = ch.origName;
+        ch.values.set(ch.origValues);
+        ch.min = ch.origMin;
+        ch.max = ch.origMax;
+        ch.avg = ch.origAvg;
+      }
+    }
+  });
+}
+
 document.getElementById("channelSearch").addEventListener("input", () => renderChannelTable());
 document.getElementById("snapSearch").addEventListener("input", () => renderSnapshotsTable());
 document.getElementById("chkOnlyDiff").addEventListener("change", () => renderSnapshotsTable());
@@ -169,6 +216,7 @@ function ingestParsedFiles(parsedList) {
   renderEcuCard();
 
   if (state.liveData) {
+    applyPressureUnitToLiveData();
     buildSmartPresets(state.liveData.channels);
     renderChannelTable();
     syncChartAndTable();
@@ -366,7 +414,7 @@ function handleCursorMove(idx) {
     const cell = document.getElementById(`cur_${ch.id}`);
     if (!cell) return;
     cell.textContent = ch.isNumeric
-      ? ch.values[idx].toFixed(2)
+      ? ch.values[idx].toFixed(ch.unit === "bar" ? 2 : 2)
       : ch.rawText[idx];
   });
 }
@@ -425,7 +473,10 @@ function renderSnapshotsTable() {
     if (query && !key.toLowerCase().includes(query)) return;
     const vals = state.snapshots.map(s => {
       const found = s.blocks.find(b => b.key === key);
-      return found ? found.value : "—";
+      if (!found) return "—";
+      return typeof convertPressureString === "function"
+        ? convertPressureString(found.value, state.pressureUnit)
+        : found.value;
     });
     const isDiff = new Set(vals).size > 1;
     if (onlyDiff && !isDiff) return;
