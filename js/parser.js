@@ -3,6 +3,7 @@
  * Supports:
  * 1) OP-COM LiveData logs ([PROGVER], [MODELINFO], [ECUINFO], Time + Units + Rows)
  * 2) OP-COM Measuring Blocks Snapshots (Date and time>, Selected model>, Control Unit:, Measuring blocks information:)
+ * 3) Slash-separated multi-sample cells (e.g. "1 046 / 1 043 / 1 027") expanded into time series or stats
  */
 
 const PALETTE = [
@@ -41,6 +42,33 @@ function splitCsvLine(line) {
   }
   result.push(cur.trim());
   return result;
+}
+
+function parseNumericToken(tok) {
+  if (tok === undefined || tok === null) return NaN;
+  const cleaned = String(tok).trim().replace(/\s+/g, "").replace(",", ".");
+  if (!cleaned || !/^[-+]?\d+(?:\.\d+)?$/.test(cleaned)) return NaN;
+  return Number(cleaned);
+}
+
+function parseSlashSeries(cell) {
+  if (typeof cell !== "string" || !cell.includes("/")) return null;
+  const parts = cell.split("/").map(p => p.trim()).filter(Boolean);
+  if (parts.length < 2) return null;
+  const nums = parts.map(parseNumericToken);
+  if (nums.some(n => Number.isNaN(n))) return null;
+  return nums;
+}
+
+
+function convertPressureString(str, targetUnit) {
+  if (targetUnit !== "bar" || typeof str !== "string") return str;
+  // Replace numbers followed by kPa (including ranges like "100–210 kPa" or "210 kPa")
+  return str.replace(/([-+]?\d+(?:\.\d+)?)(\s*)kPa\b/gi, (_, numStr, sp) => {
+    const val = parseFloat(numStr);
+    if (Number.isNaN(val)) return _;
+    return `${(val / 100).toFixed(2)}${sp}bar`;
+  });
 }
 
 function parseOpcomFile(text, fileName) {
@@ -109,29 +137,93 @@ function parseLiveDataCsv(lines, fileName) {
   const rawHeaders = splitCsvLine(lines[headerIdx]);
   const rawUnits = splitCsvLine(lines[headerIdx + 1]);
 
-  // Trim trailing empty columns
   while (rawHeaders.length > 0 && rawHeaders[rawHeaders.length - 1] === "") {
     rawHeaders.pop();
     rawUnits.pop();
   }
 
   const colCount = rawHeaders.length;
-  const times = [];
+  const rawTimes = [];
   const rawColumns = Array.from({ length: colCount }, () => []);
 
   for (let r = headerIdx + 2; r < lines.length; r++) {
     const line = lines[r].trim();
     if (!line) continue;
     const cells = splitCsvLine(line);
-    const t = parseFloat(cells[0]);
+    const t = parseNumericToken(cells[0]);
     if (Number.isNaN(t)) continue;
-    times.push(t);
+    rawTimes.push(t);
     for (let c = 1; c < colCount; c++) {
       rawColumns[c].push(cells[c] !== undefined ? cells[c] : "");
     }
   }
 
-  // Build modular channel definitions (disambiguating duplicate names like Boost Pressure [kPa] vs [V])
+  // Detect columns containing slash-separated multi-sample arrays (e.g. "1 046 / 1 043 / 1 027")
+  const slashColInfo = {};
+  let maxSubSamples = 1;
+
+  for (let c = 1; c < colCount; c++) {
+    let slashRows = 0;
+    let maxLen = 1;
+    for (let i = 0; i < rawColumns[c].length; i++) {
+      const arr = parseSlashSeries(rawColumns[c][i]);
+      if (arr) {
+        slashRows++;
+        if (arr.length > maxLen) maxLen = arr.length;
+      }
+    }
+    if (slashRows > 0 && slashRows >= rawColumns[c].length * 0.25) {
+      slashColInfo[c] = { maxLen };
+      if (maxLen > maxSubSamples) maxSubSamples = maxLen;
+    }
+  }
+
+  // Expand time axis when slash-separated sub-samples exist so rapid oscillations are plotted smoothly
+  let times = rawTimes;
+  let expandedColumns = rawColumns;
+
+  if (maxSubSamples > 1 && rawTimes.length > 1) {
+    const expTimes = [];
+    const expCols = Array.from({ length: colCount }, () => []);
+
+    for (let i = 0; i < rawTimes.length; i++) {
+      const tStart = rawTimes[i];
+      const nextT = i < rawTimes.length - 1 ? rawTimes[i + 1] : tStart + (rawTimes[i] - rawTimes[i - 1] || 0.1);
+      const dt = Math.max(0.001, (nextT - tStart) / maxSubSamples);
+
+      const rowSubArrays = {};
+      let rowFactor = 1;
+      for (let c = 1; c < colCount; c++) {
+        if (slashColInfo[c]) {
+          const arr = parseSlashSeries(rawColumns[c][i]);
+          if (arr && arr.length > 0) {
+            rowSubArrays[c] = arr;
+            if (arr.length > rowFactor) rowFactor = arr.length;
+          }
+        }
+      }
+
+      const stepCount = rowFactor > 1 ? rowFactor : 1;
+      const stepDt = rowFactor > 1 ? Math.max(0.001, (nextT - tStart) / stepCount) : 0;
+
+      for (let s = 0; s < stepCount; s++) {
+        expTimes.push(rowFactor > 1 ? tStart + s * stepDt : tStart);
+        for (let c = 1; c < colCount; c++) {
+          if (rowSubArrays[c]) {
+            const arr = rowSubArrays[c];
+            const idx = Math.min(arr.length - 1, Math.floor((s * arr.length) / stepCount));
+            expCols[c].push(String(arr[idx]));
+          } else {
+            expCols[c].push(rawColumns[c][i]);
+          }
+        }
+      }
+    }
+
+    times = expTimes;
+    expandedColumns = expCols;
+  }
+
   const nameCounts = {};
   rawHeaders.forEach(h => { nameCounts[h] = (nameCounts[h] || 0) + 1; });
 
@@ -141,7 +233,7 @@ function parseLiveDataCsv(lines, fileName) {
     const unit = (rawUnits[c] || "").trim();
     const displayName = (nameCounts[baseName] > 1 && unit) ? `${baseName} [${unit}]` : baseName;
 
-    const colVals = rawColumns[c];
+    const colVals = expandedColumns[c];
     let numCount = 0;
     let strCount = 0;
     const distinctStrings = new Set();
@@ -149,7 +241,7 @@ function parseLiveDataCsv(lines, fileName) {
     for (let i = 0; i < colVals.length; i++) {
       const v = colVals[i];
       if (v === "") continue;
-      const n = Number(v);
+      const n = parseNumericToken(v);
       if (!Number.isNaN(n)) {
         numCount++;
       } else {
@@ -166,7 +258,7 @@ function parseLiveDataCsv(lines, fileName) {
     if (isNumeric) {
       let min = Infinity, max = -Infinity, sum = 0, valid = 0;
       for (let i = 0; i < times.length; i++) {
-        const n = parseFloat(colVals[i]);
+        const n = parseNumericToken(colVals[i]);
         if (!Number.isNaN(n)) {
           values[i] = n;
           if (n < min) min = n;
@@ -184,6 +276,7 @@ function parseLiveDataCsv(lines, fileName) {
         unit: unit || "—",
         isNumeric: true,
         isVirtual: false,
+        isMultiSample: Boolean(slashColInfo[c]),
         values,
         min: valid ? min : 0,
         max: valid ? max : 0,
@@ -191,7 +284,6 @@ function parseLiveDataCsv(lines, fileName) {
         color: PALETTE[(c - 1) % PALETTE.length]
       });
     } else {
-      // Discrete state channel (e.g., Active/Inactive, Okay/Fault)
       const states = Array.from(distinctStrings);
       states.forEach((s, idx) => {
         if (/^(active|on|yes|open|true|1)$/i.test(s)) stateMap[s] = 1;
@@ -206,6 +298,7 @@ function parseLiveDataCsv(lines, fileName) {
         if (mapped > max) max = mapped;
         sum += mapped;
       }
+      const previewStates = states.slice(0, 4).join(" / ") + (states.length > 4 ? ` (+${states.length - 4})` : "");
       channels.push({
         id: `ch_${c}`,
         name: displayName,
@@ -213,9 +306,10 @@ function parseLiveDataCsv(lines, fileName) {
         unit: unit || "state",
         isNumeric: false,
         isVirtual: false,
+        isMultiSample: false,
         values,
         rawText,
-        stateLabels: states.join(" / "),
+        stateLabels: previewStates,
         min: Number.isFinite(min) ? min : 0,
         max: Number.isFinite(max) ? max : 1,
         avg: times.length ? sum / times.length : 0,
@@ -224,7 +318,6 @@ function parseLiveDataCsv(lines, fileName) {
     }
   }
 
-  // Inject Calculated Virtual Math Channels when matching physical sensors exist
   const virtualChannels = buildVirtualChannels(channels, times.length);
   return { meta, times, channels: [...channels, ...virtualChannels] };
 }
@@ -234,7 +327,6 @@ function buildVirtualChannels(channels, len) {
   const findCh = (regex, unitFilter = null) =>
     channels.find(ch => ch.isNumeric && regex.test(ch.name) && (!unitFilter || ch.unit.toLowerCase() === unitFilter.toLowerCase()));
 
-  // 1. Boost Deviation (Actual - Commanded)
   const boostCmd = findCh(/Boost Pressure Command/i, "kPa");
   const boostAct = findCh(/^Boost Pressure \[kPa\]$|^Boost Pressure$/i, "kPa");
   if (boostCmd && boostAct) {
@@ -260,7 +352,6 @@ function buildVirtualChannels(channels, len) {
     });
   }
 
-  // 2. Relative Boost / Gauge Pressure (Boost - Barometric)
   const baro = findCh(/Barometric Pressure/i, "kPa");
   if (boostAct && baro) {
     const vals = new Float64Array(len);
@@ -285,7 +376,6 @@ function buildVirtualChannels(channels, len) {
     });
   }
 
-  // 3. Common Rail Fuel Pressure Deviation
   const railCmd = findCh(/Desired Common Rail Fuel Pressure/i, "MPa");
   const railAct = findCh(/^Common Rail Fuel Pressure/i, "MPa");
   if (railCmd && railAct) {
@@ -311,7 +401,6 @@ function buildVirtualChannels(channels, len) {
     });
   }
 
-  // 4. MAF Deviation (Actual - Calculated)
   const mafCalc = findCh(/Calculated Air Flow/i, "kg/h");
   const mafAct = findCh(/Mass Air Flow Sensor/i, "kg/h");
   if (mafCalc && mafAct) {
@@ -385,12 +474,19 @@ function parseSnapshotCsv(lines, fileName) {
       if (comma > 0) {
         const rawName = line.slice(0, comma).trim();
         const rawVal = line.slice(comma + 1).trim();
-        // Extract unit from value (e.g. "104 kPa" -> unit "kPa")
-        const unitMatch = rawVal.match(/^[-+]?\d+(?:\.\d+)?\s+(.+)$/);
-        const unit = unitMatch ? unitMatch[1] : "";
+        const slashArr = parseSlashSeries(rawVal);
+        let formattedVal = rawVal;
+        if (slashArr) {
+          const min = Math.min(...slashArr);
+          const max = Math.max(...slashArr);
+          const avg = slashArr.reduce((a, b) => a + b, 0) / slashArr.length;
+          formattedVal = `${avg.toFixed(1)} avg (${min}–${max}, n=${slashArr.length})`;
+        }
+        const unitMatch = rawVal.match(/[-+]?\d+(?:\.\d+)?\s+([^/]+)$/);
+        const unit = unitMatch ? unitMatch[1].trim() : "";
         nameSeen[rawName] = (nameSeen[rawName] || 0) + 1;
         const key = nameSeen[rawName] > 1 && unit ? `${rawName} [${unit}]` : rawName;
-        blocks.push({ key, name: rawName, value: rawVal, unit });
+        blocks.push({ key, name: rawName, value: formattedVal, unit });
       }
     }
   }
