@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OP-COM Visualizer Suite — By FlopyHU</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand-group">
+      <!-- Opel Blitz Emblem SVG -->
+      <div class="opel-logo-wrap" title="Opel Diagnostic Telemetry">
+        <svg class="opel-blitz" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Opel Logo">
+          <circle cx="60" cy="40" r="30" stroke="currentColor" stroke-width="5.5" />
+          <path d="M8 43 L54 33 L49 43 L112 37 L66 47 L71 37 Z" fill="var(--accent-gold)" />
+        </svg>
+      </div>
+      <div>
+        <div class="brand-title-row">
+          <h1>OP-COM VISUALIZER <span class="badge-pro">SUITE</span></h1>
+        </div>
+        <p class="brand-subtitle" data-i18n="subtitle">Modular LiveData &amp; Measuring Blocks Analyzer • By FlopyHU</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button id="btnLoadSample" class="btn btn-secondary" title="Load Z17DTH Sample Recording & Snapshots">
+        <span class="icon">⚡</span> <span data-i18n="loadSample">Load Demo Log (Z17DTH)</span>
+      </button>
+      <label for="fileInput" class="btn btn-primary">
+        <span class="icon">📂</span> <span data-i18n="uploadCsv">Open OP-COM CSV(s)</span>
+      </label>
+      <input type="file" id="fileInput" accept=".csv,.txt" multiple hidden />
+
+      <button id="btnMaskVin" class="btn btn-ghost" title="Toggle VIN Privacy Masking">
+        <span id="vinMaskIcon">👁️</span> <span data-i18n="hideVin">Mask VIN</span>
+      </button>
+      <button id="btnExportPng" class="btn btn-ghost" title="Export Current Graph as PNG" disabled>
+        <span>📸</span> <span data-i18n="exportPng">PNG</span>
+      </button>
+      <button id="btnLang" class="btn btn-lang" title="Switch Language">EN / HU</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Dropzone Banner -->
+    <section id="dropZone" class="dropzone">
+      <div class="dropzone-inner">
+        <div class="dz-icon">📈</div>
+        <h2 data-i18n="dropTitle">Drop OP-COM LiveData or Measuring Block Snapshot CSVs here</h2>
+        <p data-i18n="dropDesc">Supports any module (Engine, ABS/ESP, CIM, REC, Transmission). Drop multiple snapshots at once for automatic side-by-side diff comparison.</p>
+        <div class="dz-hints">
+          <span>[PROGVER] LiveData Logs</span>
+          <span>•</span>
+          <span>Measuring Blocks Snapshots</span>
+          <span>•</span>
+          <span>100% Client-Side (Zero Upload)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ECU & Vehicle Metadata Card -->
+    <section id="ecuCard" class="card ecu-card hidden">
+      <div class="ecu-header">
+        <div>
+          <span class="pill pill-gold" id="metaModel">—</span>
+          <span class="pill pill-blue" id="metaModule">—</span>
+          <span class="pill pill-gray" id="metaTimestamp">—</span>
+        </div>
+        <div class="ecu-stats-quick">
+          <span id="metaDuration">Duration: —</span>
+          <span>•</span>
+          <span id="metaSamples">Samples: —</span>
+          <span>•</span>
+          <span id="metaChannels">Channels: —</span>
+        </div>
+      </div>
+      <div id="ecuGrid" class="ecu-grid"></div>
+    </section>
+
+    <!-- Mode Switcher Tabs (LiveData vs Snapshot Diff) -->
+    <div id="modeTabs" class="mode-tabs hidden">
+      <button class="tab-btn active" data-tab="livedata" data-i18n="tabLivedata">LiveData Telemetry &amp; Overlays</button>
+      <button class="tab-btn" data-tab="snapshots" data-i18n="tabSnapshots">Snapshots &amp; Diff Table (<span id="snapCount">0</span>)</button>
+    </div>
+
+    <!-- LIVEDATA VIEW -->
+    <section id="viewLivedata" class="view-section hidden">
+      <!-- Smart Diagnostic Presets + Math Channels -->
+      <div class="toolbar-row">
+        <div class="preset-group">
+          <span class="toolbar-label" data-i18n="presetsLabel">Smart Overlays:</span>
+          <div id="presetButtons" class="preset-buttons"></div>
+        </div>
+        <div class="chart-controls">
+          <button id="btnToggleVirtual" class="btn btn-small btn-outline active" title="Toggle calculated math channels like Boost Error">
+            <span>🧮</span> <span data-i18n="virtualChannels">Virtual Math Channels</span>
+          </button>
+          <button id="btnResetZoom" class="btn btn-small btn-outline" data-i18n="resetZoom">Reset Zoom</button>
+          <button id="btnClearCursors" class="btn btn-small btn-outline" data-i18n="clearDelta">Clear Δ Cursors</button>
+        </div>
+      </div>
+
+      <!-- Delta Measurement Readout Bar -->
+      <div id="deltaBar" class="delta-bar hidden">
+        <span class="delta-badge">Δ CURSOR A → B</span>
+        <span id="deltaText">Click any two points on the chart to measure Δt and Δvalue.</span>
+      </div>
+
+      <!-- Interactive Canvas Chart -->
+      <div class="card chart-card">
+        <div id="activeLegend" class="active-legend"></div>
+        <div class="canvas-wrapper">
+          <canvas id="telemetryCanvas"></canvas>
+          <div id="chartTooltip" class="chart-tooltip hidden"></div>
+        </div>
+        <div class="chart-footer-hint">
+          <span data-i18n="chartHint">Scroll wheel: Zoom X-axis • Drag: Pan • Click twice: Measure Δt &amp; Δy • Multi-unit Y-axes auto-scale automatically</span>
+        </div>
+      </div>
+
+      <!-- Measuring Blocks Master Table -->
+      <div class="card table-card">
+        <div class="table-header">
+          <div>
+            <h3 data-i18n="blocksListTitle">Recorded Measuring Blocks &amp; Statistics</h3>
+            <p class="muted" data-i18n="blocksListSub">Toggle checkboxes to overlay any parameters onto the graph above.</p>
+          </div>
+          <div class="table-actions">
+            <input type="text" id="channelSearch" class="search-input" placeholder="Filter by block name or unit..." />
+            <button id="btnClearAll" class="btn btn-small btn-outline" data-i18n="uncheckAll">Uncheck All</button>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width:44px;">Plot</th>
+                <th style="width:18px;"></th>
+                <th data-i18n="colBlock">Measuring Block Name</th>
+                <th data-i18n="colUnit">Unit</th>
+                <th data-i18n="colCursor">Cursor</th>
+                <th data-i18n="colMin">Min</th>
+                <th data-i18n="colAvg">Avg</th>
+                <th data-i18n="colMax">Max</th>
+              </tr>
+            </thead>
+            <tbody id="channelTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SNAPSHOTS VIEW -->
+    <section id="viewSnapshots" class="view-section hidden">
+      <div class="card table-card">
+        <div class="table-header">
+          <div>
+            <h3 data-i18n="snapTitle">Measuring Blocks Snapshots Comparison</h3>
+            <p class="muted" data-i18n="snapSub">Side-by-side values across uploaded OP-COM snapshot files. Changed parameters are highlighted.</p>
+          </div>
+          <div class="table-actions">
+            <label class="checkbox-inline">
+              <input type="checkbox" id="chkOnlyDiff" />
+              <span data-i18n="onlyChanged">Show changed values only</span>
+            </label>
+            <input type="text" id="snapSearch" class="search-input" placeholder="Search measuring block..." />
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table" id="snapshotTable">
+            <thead id="snapshotThead"></thead>
+            <tbody id="snapshotTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <div class="footer-content">
+      <p>
+        <strong>OP-COM Visualizer Suite</strong> — Open-source diagnostic tool by
+        <a href="https://github.com/FlopyHU" target="_blank" rel="noopener">FlopyHU</a>
+        (Csönkös Csaba). Companion project to
+        <a href="https://github.com/FlopyHU/Opel-Generator-Suite-by-FlopyHU" target="_blank" rel="noopener">Opel Generator Suite</a>.
+      </p>
+      <p class="footer-note">
+        Free for personal &amp; community enthusiast use. Forks &amp; pull requests welcome; uncredited commercial redistribution prohibited.
+      </p>
+    </div>
+  </footer>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/parser.js"></script>
+  <script src="js/chart.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

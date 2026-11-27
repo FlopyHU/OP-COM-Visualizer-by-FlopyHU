@@ -1,0 +1,20 @@
+OP-COM Visualizer Suite — Open-Source Non-Commercial Attribution License
+Copyright (c) 2026 Csönkös Csaba (FlopyHU)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to use,
+copy, modify, and distribute the Software for personal, educational, and
+non-commercial community purposes, subject to the following conditions:
+
+1. Attribution: The original author credit ("FlopyHU / Csönkös Csaba") and link
+   to https://github.com/FlopyHU/OP-COM-Visualizer-by-FlopyHU must be retained
+   in all copies, forks, and substantial portions of the Software.
+2. Non-Commercial Use: The Software and derivative works may not be sold,
+   licensed commercially, or bundled into paid diagnostic products without
+   explicit written permission from the author.
+3. Contributions: Public improvements are encouraged via GitHub forks and
+   pull requests to the upstream repository.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
