@@ -13,7 +13,6 @@ const PALETTE = [
 ];
 
 function decodeBufferSmart(arrayBuffer) {
-  // OP-COM exports Windows-1250 / Windows-1252 (0xB0 degree symbol)
   const utf8Text = new TextDecoder("utf-8", { fatal: false }).decode(arrayBuffer);
   if (utf8Text.includes("\uFFFD")) {
     try {
@@ -60,10 +59,8 @@ function parseSlashSeries(cell) {
   return nums;
 }
 
-
 function convertPressureString(str, targetUnit) {
   if (targetUnit !== "bar" || typeof str !== "string") return str;
-  // Replace numbers followed by kPa (including ranges like "100–210 kPa" or "210 kPa")
   return str.replace(/([-+]?\d+(?:\.\d+)?)(\s*)kPa\b/gi, (_, numStr, sp) => {
     const val = parseFloat(numStr);
     if (Number.isNaN(val)) return _;
@@ -189,7 +186,6 @@ function parseLiveDataCsv(lines, fileName) {
     for (let i = 0; i < rawTimes.length; i++) {
       const tStart = rawTimes[i];
       const nextT = i < rawTimes.length - 1 ? rawTimes[i + 1] : tStart + (rawTimes[i] - rawTimes[i - 1] || 0.1);
-      const dt = Math.max(0.001, (nextT - tStart) / maxSubSamples);
 
       const rowSubArrays = {};
       let rowFactor = 1;
