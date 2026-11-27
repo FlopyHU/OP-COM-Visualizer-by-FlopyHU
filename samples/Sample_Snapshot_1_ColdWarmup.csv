@@ -1,0 +1,79 @@
+OP-COM 100219a - PC based diagnostic tool
+
+Date and time>,27/10/2026. 13:3327
+
+Workshop information:
+
+hkj
+
+
+Selected model>,2005,Astra-H,Engine,Z 17 DTH
+
+Control Unit: 
+
+
+Identifier: 0x0705
+VIN: W0L0AHL3555000000
+Hardware number:81012694
+Motor type: Z17DTH      
+Part Number:55560810
+Software version number: 663t71s1  
+Hardware manufacturer number: 0281012694
+Software Number: 1037376412P368_I63
+Programming Date: FFFFFFFF
+Hardware key number: ˙˙˙˙˙˙˙˙˙˙
+System description: BOSCH0100
+Type approval number: B04015
+Variant programming: 0x00000002
+Alpha code: DB 
+Hardware manufacturer system name: EDC16
+ECU variant coding: 0x000000C5
+
+Measuring blocks information:
+
+Battery Voltage,14.1 V
+APP at Idle Position (Accelerator Pedal Position),Active
+APP Sensor 1 (Accelerator Pedal Position),0.96 V
+APP Sensor 2 (Accelerator Pedal Position),0.47 V
+Calculated Pedal Position,0 %
+Desired Engine Idle Speed,850 RPM
+Engine Speed,849 RPM
+Camshaft Speed,425 RPM
+Calculated Air Flow,43 kg/h
+Mass Air Flow Sensor,43 kg/h
+Intake Air Temperature,39 °C
+Intake Air Temperature,1.87 V
+Coolant Temperature,72 °C
+Coolant Temperature,1.23 V
+Oil Level,Normal
+Oil Pressure,Normal
+Engine Oil Level Status,Okay
+Barometric Pressure,100 kPa
+Barometric Pressure,3.94 V
+Boost Pressure Command,104 kPa
+Boost Pressure,100 kPa
+Boost Pressure,1.86 V
+Pulse Ratio Boost Pressure Solenoid Valve,42 %
+EGR Position Commanded (Exhaust Gas Recirculation),100 %
+EGR Pulse Ratio (Exhaust Gas Recirculation),5 %
+Swirl Level Control Solenoid Valve Pulse Ratio,100 %
+Throttle Position PWM Servo Signal,12 %
+Desired Common Rail Fuel Pressure,24.00 MPa
+Common Rail Fuel Pressure,24.42 MPa
+Common Rail Fuel Pressure,1.04 V
+Fuel Metering Solenoid Valve PWM,36 %
+Fuel Metering Solenoid Valve Current,1.28 a
+A/C Information Switch (Air Conditioning),Inactive
+A/C Pressure (Air Conditioning),780 kPa
+A/C Pressure (Air Conditioning),1.2 V
+A/C Cutoff Mode (Air Conditioning),System OK
+A/C Relay (Air Conditioning),Inactive
+Brake Switch 1,Inactive
+Brake Switch 2,Inactive
+Clutch Switch,Inactive
+Vehicle Speed,0 km/h
+Vehicle Speed in Cruise Control Range,Inactive
+Cruise Control Tip Switch,Inactive
+Cruise Control,Inactive
+Glow Time Relay,Inactive 12V
+Diagnosis Glow Time Relay,Inactive
