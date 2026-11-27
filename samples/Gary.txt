@@ -1,1 +1,44 @@
-
+# Unlike my EE-Core project where a file was created completely by accident 
+# and left as an easter egg, in THIS repo (OP-COM-Visualizer-by-FlopyHU)
+# gary.txt exists for a very practical reason: the GitHub web uploader
+# doesn't create empty folders on its own, so Gary showed up right here
+# so the /samples/ directory could be created cleanly for the sample CSV logs!
+#
+# And since we called him Gary last time, here is Gary the cat who wanders 
+# through my projects:
+#
+#     /\_____/\
+#    /  o   o  \
+#   ( ==  ^  == )
+#    )         (
+#   (           )
+#  ( (  )    (  ) )
+# (__(__)___(__)__)
+#
+#    ____    _    ____  __   __
+#   / ___|  / \  |  _ \ \ \ / /
+#  | |  _  / _ \ | |_) | \ V / 
+#  | |_|[ ]/ ___ \|  _ <   | |  
+#   \____/_/   \_\_| \_\  |_|  
+#
+#   _____ _   _ _____ 
+#  |_   _| | | | ____|
+#    | | | |_| |  _|  
+#    | | |  _  | |___ 
+#    |_| |_| |_|_____|
+#
+#    ____    _    _____ 
+#   / ___|  / \  |_   _|
+#  | |     / _ \   | |  
+#  | |___ / ___ \  | |  
+#   \____/_/   \_\ |_|  
+#
+# =====================================================================
+#  GARY'S PWM & DUTY CYCLE TELEMETRY MONITOR 
+# =====================================================================
+#  Boost Solenoid Pulse Ratio (VNT)   [||||||||..........]  41%  (idle/base)
+#  Fuel Metering Solenoid PWM         [|||||||...........]  34%  (rail control)
+#  Throttle Position PWM Servo Signal [||................]  12%  (position)
+#  EGR Pulse Ratio                    [|.................]   5%  (closed/low)
+#  Gary Purr & Desk Inspection PWM    [||||||||||||||||||]  90%  (critical)
+# =====================================================================
