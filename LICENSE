@@ -1,20 +1,38 @@
-OP-COM Visualizer Suite — Open-Source Non-Commercial Attribution License
+Custom Source-Available License (FlopyHU OP-COM Visualizer Suite)
+
 Copyright (c) 2026 FlopyHU
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to use,
-copy, modify, and distribute the Software for personal, educational, and
-non-commercial community purposes, subject to the following conditions:
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, publish, and distribute the original software free of
+charge (excluding any right to sell or commercialize), subject to the following
+conditions:
 
-1. Attribution: The original author credit ("FlopyHU / Csönkös Csaba") and link
-   to https://github.com/FlopyHU/OP-COM-Visualizer-by-FlopyHU must be retained
-   in all copies, forks, and substantial portions of the Software.
-2. Non-Commercial Use: The Software and derivative works may not be sold,
-   licensed commercially, or bundled into paid diagnostic products without
-   explicit written permission from the author.
-3. Contributions: Public improvements are encouraged via GitHub forks and
-   pull requests to the upstream repository.
+1. Free-to-Use Mandate: This tool is strictly free. Selling, commercializing, or
+   charging any form of payment for this software or any modified version is
+   strictly prohibited.
+2. Fork & Contribution Workflow: You are free to share and distribute the
+   original software. Duplicating this repository into a separate standalone
+   repository to republish it as your own project without attribution is
+   prohibited. Modifications, additions, and new modules are encouraged via
+   GitHub forks and pull requests to the official repository so contributions
+   can be reviewed, integrated, and credited.
+3. Meaningful Changes: Minor or superficial styling tweaks alone do not justify
+   a separate standalone fork. Substantial functional improvements (such as new
+   parsers, presets, or diagnostic views) are welcome through pull requests.
+4. Attribution & Branding: Core author credit (FlopyHU) and links to the
+   official repository must remain intact in public forks and derivative works.
+5. Copyright Notice: Original copyright notices and attribution (FlopyHU) must
+   be preserved across all copies and derivative works.
+6. Asset & Trademark Disclaimer: External brand assets or logos referenced by
+   URL are loaded remotely rather than hosted locally in this repository; the
+   author accepts no liability for third-party hosting or trademark claims.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
