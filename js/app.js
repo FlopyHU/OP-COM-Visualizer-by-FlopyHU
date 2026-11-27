@@ -64,8 +64,24 @@ btnExportPng.addEventListener("click", () => {
 });
 
 btnLang.addEventListener("click", () => {
-  setLanguage(currentLang === "en" ? "hu" : "en");
+  const next = currentLang === "en" ? "hu" : "en";
+  setLanguage(next);
+  const flag = document.getElementById("langFlag");
+  if (flag) flag.src = next === "hu" ? "https://flagcdn.com/w20/hu.png" : "https://flagcdn.com/w20/gb.png";
 });
+
+function setLook(look) {
+  const isClassic = look === "classic";
+  document.body.classList.toggle("look-classic", isClassic);
+  document.body.classList.toggle("look-modern", !isClassic);
+  document.getElementById("btnLookModern").classList.toggle("active", !isClassic);
+  document.getElementById("btnLookClassic").classList.toggle("active", isClassic);
+  if (typeof chart !== "undefined") chart.render();
+}
+
+document.getElementById("btnLookModern").addEventListener("click", () => setLook("modern"));
+document.getElementById("btnLookClassic").addEventListener("click", () => setLook("classic"));
+
 
 document.querySelectorAll(".tab-btn").forEach(btn => {
   btn.addEventListener("click", () => switchTab(btn.dataset.tab));
